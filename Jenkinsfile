@@ -33,16 +33,16 @@ pipeline {
                          
                     }
                 }
-                stage('unit testing'){
-                    steps{
-                        withCredentials([usernamePassword(credentialsId: 'mongodb-cred', passwordVariable: 'MONGO_PASSWORD', usernameVariable: 'MONGO_USERNAME')]) {
-                            sh 'npm test'
-                        }
-                        junit allowEmptyResults: true, testResults: 'test-results.xml'
-                    }
-                }
 
             }
+        stage('unit testing'){
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'mongodb-cred', passwordVariable: 'MONGO_PASSWORD', usernameVariable: 'MONGO_USERNAME')]) {
+                    sh 'npm test'
+                }
+                junit allowEmptyResults: true, testResults: 'test-results.xml'
+            }
         }
+    }
     }
 }     
