@@ -15,6 +15,7 @@ pipeline {
                     steps{
                         sh 'npm audit --audit-level=critical'
                     }
+                }
                 stage('owasp'){
                     steps{
                         dependencyCheck additionalArguments: '''
@@ -26,7 +27,6 @@ pipeline {
                     }
                 }
 
-                }
             }
         }
     }
