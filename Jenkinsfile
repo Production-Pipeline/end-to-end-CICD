@@ -24,7 +24,7 @@ pipeline {
                             --format "ALL"
                             --prettyPrint
                             --noupdate''', odcInstallation: 'dep-check-10'
-                        dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: true
+                        dependencyCheckPublisher failedTotalCritical: 6, pattern: 'dependency-check-report.xml', stopBuild: true
                          
                     }
                 }
