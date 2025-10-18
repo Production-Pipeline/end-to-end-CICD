@@ -22,8 +22,7 @@ pipeline {
                             --scan "./"
                             --out "./"
                             --format "ALL"
-                            --prettyPrint
-                            --noupdate''', odcInstallation: 'dep-check-10'
+                            --prettyPrint''', odcInstallation: 'dep-check-10'
                         dependencyCheckPublisher failedTotalCritical: 6, pattern: 'dependency-check-report.xml', stopBuild: true
                          
                     }
