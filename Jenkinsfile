@@ -50,14 +50,17 @@ pipeline {
         }
         stage('SAST'){
             steps{
-                sh '''
-                    $SONAR_HOME/bin/sonar-scanner \
-                        -Dsonar.projectKey=production-pipeline \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=http://65.0.69.86:9000 \
-                        -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info \
-                        -Dsonar.token=sqp_a10d218771bb1bb4fcfc56a3907809d8315fb2aa
-                '''
+                timeout(time: 60, unit: 'SECONDS') {
+                    withSonarQubeEnv('sonar-server') {
+                        sh '''
+                            $SONAR_HOME/bin/sonar-scanner \
+                                -Dsonar.projectKey=production-pipeline \
+                                -Dsonar.sources=app.js \
+                                -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info \
+                        '''
+                    }
+                }
+                waitForQualityGate abortPipeline: true
             }
         }
     }
