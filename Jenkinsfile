@@ -107,7 +107,7 @@ pipeline {
         }
         stage('docker push'){
             steps{
-                withDockerRegistry(credentialsId: 'docker-cred', url: '""') {
+                withDockerRegistry(credentialsId: 'docker-cred', url: "") {
                     sh 'docker push sunilpolaki/production:$GIT_COMMIT'
                 }
             }
