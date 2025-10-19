@@ -68,6 +68,43 @@ pipeline {
                 sh 'docker build -t sunilpolaki/production:$GIT_COMMIT .'
             }
         }
+        stage('trivy'){
+            steps{
+                sh '''
+                    trivy image sunilpolaki/production:$GIT_COMMIT \
+                        --severity LOW,MEDIUM,HIGH \
+                        --exit-code 0 \
+                        --quiet \
+                        --format json -o image-medium-results.json 
+
+                    trivy image chakribaggam123/demo:$GIT_COMMIT \
+                        --severity CRITICAL \
+                        --exit-code 0 \
+                        --quiet \
+                        --format json -o image-critical-results.json
+                '''
+            }
+            post {
+                always {
+                    sh '''
+                        trivy convert --format template --template "@/usr/local/share/trivy/templates/html.tpl" \
+                            --output image-medium-results.html image-medium-results.json
+
+                        trivy convert --format template --template "@/usr/local/share/trivy/templates/html.tpl" \
+                            --output image-critical-results.html image-critical-results.json
+
+                        # Convert to JUnit XML reports
+                        trivy convert --format template --template "@/usr/local/share/trivy/templates/junit.tpl" \
+                            --output image-medium-results.xml image-medium-results.json
+
+                        trivy convert --format template --template "@/usr/local/share/trivy/templates/junit.tpl" \
+                            --output image-critical-results.xml image-critical-results.json
+                    '''
+
+                    junit allowEmptyResults: true, testResults: 'image-*.xml'
+                }
+            }
+        }
     }
     post {
         always {
@@ -75,6 +112,10 @@ pipeline {
             junit allowEmptyResults: true, testResults: 'dependency-check-junit.xml'
             junit allowEmptyResults: true, testResults: 'test-results.xml'
             publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+            publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, icon: '', keepAll: true, reportDir: './', reportFiles: 'image-medium-results.html', reportName: 'trivy medium report', reportTitles: '', useWrapperFileDirectly: true])
+            junit allowEmptyResults: true, testResults: 'image-medium-results.xml'
+            junit allowEmptyResults: true, testResults: 'image-critical-results.xml'
+            publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, icon: '', keepAll: true, reportDir: './', reportFiles: 'image-critical-results.html', reportName: 'trivy critical Report', reportTitles: '', useWrapperFileDirectly: true])
 
     
         }
