@@ -5,6 +5,8 @@ pipeline {
     }
     environment {
         MONGO_URI = "mongodb+srv://supercluster.d83jj.mongodb.net/superData"
+        MONGO_USERNAME = credentials('mongo-username')
+        MONGO_PASSWORD = credentials('mongo-password')
     }
     stages {
         stage('Installing Dependencies') {
@@ -27,9 +29,6 @@ pipeline {
                             --format "ALL"
                             --prettyPrint''', odcInstallation: 'dep-check-10'
                         dependencyCheckPublisher failedTotalCritical: 6, pattern: 'dependency-check-report.xml', stopBuild: true
-
-                        publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, icon: '', keepAll: true, reportDir: './', reportFiles: 'dependency-check-report.html', reportName: 'dpckeck HTML Report', reportTitles: '', useWrapperFileDirectly: true])
-                        junit allowEmptyResults: true, testResults: 'dependency-check-junit.xml'
                          
                     }
                 }
@@ -38,21 +37,25 @@ pipeline {
         }
         stage('unit testing'){
             steps{
-                withCredentials([usernamePassword(credentialsId: 'mongodb-cred', passwordVariable: 'MONGO_PASSWORD', usernameVariable: 'MONGO_USERNAME')]) {
-                    sh 'npm test'
-                }
-                junit allowEmptyResults: true, testResults: 'test-results.xml'
+                sh 'npm test'
             }
         }
         stage('code coverage'){
             steps{
-                withCredentials([usernamePassword(credentialsId: 'mongodb-cred', passwordVariable: 'MONGO_PASSWORD', usernameVariable: 'MONGO_USERNAME')]) {
                     catchError(buildResult: 'SUCCESS', message: 'holy shit!!!', stageResult: 'UNSTABLE') {
                         sh 'npm run coverage'
-                    }
                 }
-                publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
             }
         }
     }
+    post {
+        always {
+    
+        }
+    }
+    publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, icon: '', keepAll: true, reportDir: './', reportFiles: 'dependency-check-report.html', reportName: 'dpckeck HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+    junit allowEmptyResults: true, testResults: 'dependency-check-junit.xml'
+    junit allowEmptyResults: true, testResults: 'test-results.xml'
+    publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+
 }     
