@@ -77,7 +77,7 @@ pipeline {
                         --quiet \
                         --format json -o image-medium-results.json 
 
-                    trivy image chakribaggam123/demo:$GIT_COMMIT \
+                    trivy image sunilpolaki/production:$GIT_COMMIT \
                         --severity CRITICAL \
                         --exit-code 0 \
                         --quiet \
