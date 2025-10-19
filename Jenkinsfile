@@ -63,6 +63,11 @@ pipeline {
                 waitForQualityGate abortPipeline: true
             }
         }
+        stage{
+            steps{
+                sh 'docker build -t sunilpolaki/production:$GIT_COMMIT .'
+            }
+        }
     }
     post {
         always {
