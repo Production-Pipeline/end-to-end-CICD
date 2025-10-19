@@ -7,6 +7,7 @@ pipeline {
         MONGO_URI = "mongodb+srv://supercluster.d83jj.mongodb.net/superData"
         MONGO_USERNAME = credentials('mongo-username')
         MONGO_PASSWORD = credentials('mongo-password')
+        SONAR_HOME = tool 'sonar-scanner'
     }
     stages {
         stage('Installing Dependencies') {
@@ -45,6 +46,18 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', message: 'holy shit!!!', stageResult: 'UNSTABLE') {
                         sh 'npm run coverage'
                 }
+            }
+        }
+        stage('SAST'){
+            steps{
+                sh '''
+                    $SONAR_HOME/bin/sonar-scanner \
+                        -Dsonar.projectKey=production-pipeline \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://65.0.69.86:9000 \
+                        -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info \
+                        -Dsonar.token=sqp_a10d218771bb1bb4fcfc56a3907809d8315fb2aa
+                '''
             }
         }
     }
