@@ -203,6 +203,37 @@ pipeline {
                 """
             }
         }
+        stage("app deployed") {
+            when{
+                branch 'PR*'
+            }
+            steps {
+                timeout(time: 1, unit: 'DAYS') {
+                    input message: 'Is the new version of the app synced and deployed?', ok: 'Yes'
+                }
+            }
+        }
+
+        stage('DAST - OWASP ZAP') {
+            when {
+                branch 'PR*'
+            }
+            steps {
+                catchError(buildResult: 'SUCCESS', message: 'no worries', stageResult: 'UNSTABLE'){
+                    sh '''
+                    chmod 777 $(pwd)
+                    docker run -v $(pwd):/zap/wrk/:rw ghcr.io/zaproxy/zaproxy zap-api-scan.py \
+                    -t http://43.205.206.18:30000/api-docs/ \
+                    -f openapi \
+                    -r zap_report.html \
+                    -w zap_report.md \
+                    -J zap_json_report.json \
+                    -x zap_xml_report.xml
+                    -c zap_ignore_rules
+                    '''
+                }
+            }
+        }
     }
     post {
         always {
