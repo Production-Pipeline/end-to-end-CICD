@@ -187,7 +187,7 @@ pipeline {
                 branch 'PR*'
             }
             steps{
-                sh """
+                sh '''
                     curl -s -o response.json -w "%{http_code}" -X POST \\
                     https://api.github.com/repos/Production-Pipeline/argo-cd/pulls \\
                     -H "Accept: application/vnd.github+json" \\
@@ -197,10 +197,10 @@ pipeline {
                         "title": "Updated Docker Image",
                         "body": "Updated docker image in deployment manifest",
                         "head": "feature-${BUILD_ID}",
-                        "base": "main"
+                        "base": "main",
                         "assignees": ["chakribaggam456"]
                     }'
-                """
+                '''
             }
         }
     }
