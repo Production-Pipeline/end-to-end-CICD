@@ -113,11 +113,14 @@ pipeline {
             }
         }
         stage('aws'){
+            when {
+                branch comparator: 'REGEXP', pattern: 'feature*'
+            }
             steps{
                 script{
                     sshagent(['ssh']) {
                         sh """
-                        ssh -o StrictHostKeyChecking=no ubuntu@13.204.68.252 '
+                        ssh -o StrictHostKeyChecking=no ubuntu@13.201.225.128 '
                             if sudo docker ps -a | grep -q "solar-system"; then
                                 echo "Container found. Stopping..."
                                 sudo docker stop solar-system && sudo docker rm solar-system
@@ -136,6 +139,20 @@ pipeline {
 
                 }
             }
+        }
+        stage("integration testing"){
+            when {
+                branch comparator: 'REGEXP', pattern: 'feature*'
+            }
+            steps{
+                withAWS(credentials: 'aws-aws-iam-s3', region: 'ap-south-1') {
+                    sh '''
+                        bash integration.sh
+                    '''
+                }
+
+            }
+            
         }
     }
     post {
