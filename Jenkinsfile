@@ -194,14 +194,11 @@ pipeline {
                     -H "Authorization: token ${GIT_TOKEN}" \\
                     -H "Content-Type: application/json" \\
                     -d '{
-                        "assignee": "chakribaggam456",
-                        "assignees": [
-                            "chakribaggam456"
-                        ],
                         "title": "Updated Docker Image",
                         "body": "Updated docker image in deployment manifest",
                         "head": "feature-${BUILD_ID}",
-                        "base": "main",
+                        "base": "main"
+                        "assignees": ["chakribaggam456"]
                     }'
                 """
             }
