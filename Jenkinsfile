@@ -170,7 +170,7 @@ pipeline {
                         cat deployment.yml
 
 
-                        ##### Commit and Push to Feature Branch #####
+                        ##### Commit and Push to Feature Branch yes#####
                         git config --global user.email "chakrachandb@gmail.com"
                         git config --global user.name "chakribaggam456"
                         git remote set-url origin https://$GIT_TOKEN@github.com/Production-Pipeline/argo-cd.git
