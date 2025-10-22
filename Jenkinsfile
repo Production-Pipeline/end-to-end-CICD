@@ -8,6 +8,7 @@ pipeline {
         MONGO_USERNAME = credentials('mongo-username')
         MONGO_PASSWORD = credentials('mongo-password')
         SONAR_HOME = tool 'sonar-scanner'
+        GIT_TOKEN = credentials('git-token')
     }
     stages {
         stage('Installing Dependencies') {
@@ -154,9 +155,41 @@ pipeline {
             }
             
         }
+        stage("update image tag"){
+            when{
+                branch 'PR*'
+            }
+            steps{
+                sh 'git clone -b main https://github.com/Production-Pipeline/argo-cd.git'
+                dir('argo-cd/kubernetes'){
+                    sh '''
+                        ##### Replace Docker Tag #####
+                        git checkout main
+                        git checkout -b feature-$BUILD_ID
+                        sed -i "s#sunilp.*#sunilpolaki/production:$GIT_COMMIT#g" deployment.yml
+                        cat deployment.yml
+
+
+                        ##### Commit and Push to Feature Branch #####
+                        git config --global user.email "chakrachandb@gmail.com"
+                        git config --global user.name "chakribaggam456"
+                        git remote set-url origin http://$GIT_TOKEN@github.com/Production-Pipeline/argo-cd.git
+                        git add .
+                        git commit -am "Updated docker image"
+                        git push -u origin feature-$BUILD_ID
+                    '''
+                }
+
+            }
+        }
     }
     post {
         always {
+            script {
+                if (fileExists('argo-cd')) {
+                    sh 'rm -rf argo-cd'
+                }
+            }
             publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, icon: '', keepAll: true, reportDir: './', reportFiles: 'dependency-check-report.html', reportName: 'dpckeck HTML Report', reportTitles: '', useWrapperFileDirectly: true])
             junit allowEmptyResults: true, testResults: 'dependency-check-junit.xml'
             junit allowEmptyResults: true, testResults: 'test-results.xml'
