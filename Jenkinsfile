@@ -114,7 +114,7 @@ pipeline {
         }
         stage('aws'){
             when {
-                branch comparator: 'REGEXP', pattern: 'feature*'
+                branch comparator: 'REGEXP', pattern: 'feature.*'
             }
             steps{
                 script{
@@ -142,7 +142,7 @@ pipeline {
         }
         stage("integration testing"){
             when {
-                branch comparator: 'REGEXP', pattern: 'feature*'
+                branch comparator: 'REGEXP', pattern: 'feature.*'
             }
             steps{
                 withAWS(credentials: 'aws-aws-iam-s3', region: 'ap-south-1') {
