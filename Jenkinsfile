@@ -182,25 +182,25 @@ pipeline {
 
             }
         }
-        stage('pull request on manifest repo'){
-            when{
-                branch 'PR*'
+        stage('raising pr for main'){
+            when {
+              branch 'PR*'
             }
-            steps{
-                sh '''
-                    curl -s -o response.json -w "%{http_code}" -X POST \\
-                        https://api.github.com/repos/Production-Pipeline/argo-cd/pulls \\
-                        -H "Accept: application/vnd.github+json" \\
-                        -H "Authorization: token ${GIT_TOKEN}" \\
-                        -H "Content-Type: application/json" \\
-                        -d '{
-                            "title": "Updated Docker Image",
-                            "body": "Updated docker image in deployment manifest",
-                            "head": "feature-${BUILD_ID}",
-                            "base": "main",
-                            "assignees": "chakribaggam456"
-                        }'
-                '''
+            steps {
+                sh """
+                curl -s -o response.json -w "%{http_code}" -X POST \\
+                https://api.github.com/repos/Production-Pipeline/argo-cd/pulls \\
+                -H "Accept: application/vnd.github+json" \\
+                -H "Authorization: token ${GIT_TOKEN}" \\
+                -H "Content-Type: application/json" \\
+                -d '{
+                    "title": "Updated Docker Image",
+                    "body": "Updated docker image in deployment manifest",
+                    "head": "feature-${BUILD_ID}",
+                    "base": "main",
+                    "assignees": ["chakribaggam456"]
+                }'
+                """
             }
         }
     }
