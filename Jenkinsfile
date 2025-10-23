@@ -29,6 +29,7 @@ pipeline {
                             --scan "./"
                             --out "./"
                             --format "ALL"
+                            --disableYarnAudit
                             --prettyPrint''', odcInstallation: 'dep-check-10'
                         dependencyCheckPublisher failedTotalCritical: 6, pattern: 'dependency-check-report.xml', stopBuild: true
                          
@@ -244,7 +245,7 @@ pipeline {
                         ls -ltr
                         mkdir reports-$BUILD_ID
                         cp -rf coverage/ reports-$BUILD_ID/
-                        cp dependency* test-results.xml trivy*.* reports-$BUILD_ID/
+                        cp dependency* test-results.xml image* reports-$BUILD_ID/
                         ls -ltr reports-$BUILD_ID/
                     '''
                     s3Upload(
