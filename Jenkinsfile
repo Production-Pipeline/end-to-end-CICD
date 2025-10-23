@@ -234,6 +234,27 @@ pipeline {
                 }
             }
         }
+        stage{
+            when {
+                branch 'PR*'
+            }
+            steps{
+                withAWS(credentials: 'aws-aws-iam-s3', region: 'ap-south-1') {
+                    sh '''
+                        ls -ltr
+                        mkdir reports-$BUILD_ID
+                        cp -rf coverage/ reports-$BUILD_ID/
+                        cp dependency* test-results.xml trivy*.* reports-$BUILD_ID/
+                        ls -ltr reports-$BUILD_ID/
+                    '''
+                    s3Upload(
+                        file: "reports-$BUILD_ID",
+                        bucket: 'production-s3-jenkins-bucket',
+                        path: "jenkins-$BUILD_ID/"
+                    )
+                }
+            }
+        }
     }
     post {
         always {
@@ -243,6 +264,7 @@ pipeline {
                 }
             }
             publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, icon: '', keepAll: true, reportDir: './', reportFiles: 'dependency-check-report.html', reportName: 'dpckeck HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+            publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, icon: '', keepAll: true, reportDir: './', reportFiles: 'zap_report.html', reportName: 'zap HTML Report', reportTitles: '', useWrapperFileDirectly: true])
             junit allowEmptyResults: true, testResults: 'dependency-check-junit.xml'
             junit allowEmptyResults: true, testResults: 'test-results.xml'
             publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, icon: '', keepAll: true, reportDir: 'coverage/lcov-report', reportFiles: 'index.html', reportName: 'coverage HTML Report', reportTitles: '', useWrapperFileDirectly: true])
