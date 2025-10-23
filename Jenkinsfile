@@ -234,7 +234,7 @@ pipeline {
                 }
             }
         }
-        stage{
+        stage('s3 upload'){
             when {
                 branch 'PR*'
             }
